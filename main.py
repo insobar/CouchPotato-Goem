@@ -12,7 +12,6 @@ log = CPLog(__name__)
 
 
 class Goem(TorrentProvider):
-
     http_time_between_calls = 10
 
     urls = {
@@ -20,7 +19,7 @@ class Goem(TorrentProvider):
         'base_url': 'http://goem.org',
         'login': 'http://goem.org/takelogin.php',
         'login_check': 'http://goem.org/my.php',
-        'search': 'http://goem.org/advanced.php?action=search&title=%s&title-tag=%s&title-tag-type=any&year=%d&page=%d',
+        'search': 'http://goem.org/advanced.php?action=search&imdb=%s&title=&title-tag=%s&title-tag-type=any&year=%d&page=%d',
     }
 
     source = '&source%%5B%%5D=%s'
@@ -79,14 +78,14 @@ class Goem(TorrentProvider):
                 'leechers': torrent_leechers,
             })
 
-    def _format_url(self, current_page, title, year, quality_tag, use_source_tag):
+    def _format_url(self, current_page, imdb_id, year, quality_tag, use_source_tag):
         if use_source_tag:
-            return self.urls['search'] % (tryUrlencode(title), "", year, current_page) + self.source % quality_tag
+            return self.urls['search'] % (imdb_id, "", year, current_page) + self.source % quality_tag
         else:
-            return self.urls['search'] % (tryUrlencode(title), quality_tag, year, current_page)
+            return self.urls['search'] % (imdb_id, quality_tag, year, current_page)
 
     # noinspection PyBroadException
-    def _searchOnTitle(self, title, movie, quality, results):
+    def _search(self, movie, quality, results):
         quality_map = self._find_quality_params(quality['identifier'])
         if quality_map is None:
             return
@@ -95,15 +94,16 @@ class Goem(TorrentProvider):
         use_source_tag = quality_map['param']
 
         year = movie['library']['year']
+        imdb_id = movie['library']['identifier']
 
         current_page = 1
         pages = -1
 
         while True:
-            url = self._format_url(current_page, title, year, quality, use_source_tag)
-            data = self.getHTMLData(url, opener=self.login_opener)
-
             try:
+                url = self._format_url(current_page, imdb_id, year, quality, use_source_tag)
+                data = self.getHTMLData(url, opener=self.login_opener)
+
                 if data:
                     html = BeautifulSoup(data)
                     if pages == -1:
@@ -114,11 +114,12 @@ class Goem(TorrentProvider):
                         torrent_rows = torrent_table.find_all('tr', attrs={'class': 'table_row'})
                         for row in torrent_rows:
                             self._add_torrent(row, results)
-            except:
-                log.error('Failed to parsing %s: %s', (self.getName(), traceback.format_exc()))
 
-            if current_page >= pages:
-                break
+                    if current_page >= pages:
+                        break
+            except:
+                log.error('Unexpected error while searching %s: %s', (self.getName(), traceback.format_exc()))
+                return
 
     def getLoginParams(self):
         return tryUrlencode({

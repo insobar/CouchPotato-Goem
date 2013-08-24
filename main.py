@@ -1,8 +1,8 @@
 import traceback
 import re
 from bs4 import BeautifulSoup
-from core.helpers.variable import tryInt
-from core.providers.torrent.base import TorrentProvider
+from couchpotato.core.helpers.variable import tryInt
+from couchpotato.core.providers.torrent.base import TorrentProvider
 from couchpotato.core.helpers.encoding import tryUrlencode
 from couchpotato.core.logger import CPLog
 

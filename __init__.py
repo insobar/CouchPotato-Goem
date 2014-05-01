@@ -24,11 +24,11 @@ config = [{
                 },
                 {
                     'name': 'username',
-                    'default': 'actionjack',
+                    'default': '',
                 },
                 {
                     'name': 'password',
-                    'default': 'hAIerDaCx9',
+                    'default': '',
                     'type': 'password',
                 },
                 {

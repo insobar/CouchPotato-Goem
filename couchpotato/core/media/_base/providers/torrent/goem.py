@@ -92,8 +92,8 @@ class Base(TorrentProvider):
         quality = quality_map['tag']
         use_source_tag = quality_map['param']
 
-        year = movie['library']['year']
-        imdb_id = movie['library']['identifier']
+        year = movie['year']
+        imdb_id = movie['identifier']
 
         current_page = 1
         pages = -1

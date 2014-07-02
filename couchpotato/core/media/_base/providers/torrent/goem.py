@@ -18,7 +18,7 @@ class Base(TorrentProvider):
         'base_url': 'http://goem.org',
         'login': 'http://goem.org/takelogin.php',
         'login_check': 'http://goem.org/my.php',
-        'search': 'http://goem.org/advanced.php?action=search&imdb=%s&title=&title-tag=%s&title-tag-type=any&year=%d&page=%d',
+        'search': 'http://goem.org/browse.php?search=%s&stype=2&cat=0',
     }
 
     source = '&source%%5B%%5D=%s'
@@ -76,13 +76,6 @@ class Base(TorrentProvider):
                 'seeders': torrent_seeders,
                 'leechers': torrent_leechers,
             })
-
-    def _format_url(self, current_page, imdb_id, year, quality_tag, use_source_tag):
-        if use_source_tag:
-            return self.urls['search'] % (imdb_id, "", year, current_page) + self.source % quality_tag
-        else:
-            return self.urls['search'] % (imdb_id, quality_tag, year, current_page)
-
     # noinspection PyBroadException
     def _search(self, movie, quality, results):
         quality_map = self._find_quality_params(quality['identifier'])
@@ -92,7 +85,6 @@ class Base(TorrentProvider):
         quality = quality_map['tag']
         use_source_tag = quality_map['param']
 
-        year = movie['year']
         imdb_id = movie['identifier']
 
         current_page = 1
@@ -100,8 +92,8 @@ class Base(TorrentProvider):
 
         while True:
             try:
-                url = self._format_url(current_page, imdb_id, year, quality, use_source_tag)
-                data = self.getHTMLData(url, opener=self.login_opener)
+                url = self.urls['search'] % imdb_id
+                data = self.getHTMLData(url)
 
                 if data:
                     html = BeautifulSoup(data)

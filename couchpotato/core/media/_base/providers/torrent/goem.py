@@ -1,7 +1,7 @@
 import traceback
 import re
 from bs4 import BeautifulSoup
-from couchpotato.core.helpers.variable import tryInt
+from couchpotato.core.helpers.variable import tryInt, getIdentifier
 from couchpotato.core.media._base.providers.torrent.base import TorrentProvider
 from couchpotato.core.helpers.encoding import tryUrlencode
 from couchpotato.core.logger import CPLog
@@ -77,7 +77,7 @@ class Base(TorrentProvider):
                 'leechers': torrent_leechers,
             })
     # noinspection PyBroadException
-    def _search(self, movie, quality, results):
+    def _search(self, media, quality, results):
         quality_map = self._find_quality_params(quality['identifier'])
         if quality_map is None:
             return
@@ -85,7 +85,7 @@ class Base(TorrentProvider):
         quality = quality_map['tag']
         use_source_tag = quality_map['param']
 
-        imdb_id = movie['identifier']
+        imdb_id = getIdentifier(media)
 
         current_page = 1
         pages = -1
